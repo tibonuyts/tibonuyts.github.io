@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌍 Reisoverzicht — 7 Bestemmingen</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f9fa;color:#1a1a1a}
+.header{background:#1a1a2e;color:white;padding:28px 32px}
+.header h1{font-size:24px;font-weight:700;margin-bottom:4px}
+.header p{color:#a0a8b8;font-size:14px}
+.header-meta{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+.header-meta span{background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:20px;font-size:12px;color:#cbd5e0}
+.tabs{background:white;border-bottom:1px solid #e2e8f0;padding:0 32px;display:flex;gap:0;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.06);overflow-x:auto}
+.tab{padding:14px 16px;cursor:pointer;font-size:13px;font-weight:500;color:#718096;border-bottom:3px solid transparent;transition:all 0.2s;white-space:nowrap}
+.tab:hover{color:#1a1a2e}
+.tab.active{color:#1a1a2e;border-bottom-color:#1a1a2e}
+.main{max-width:1100px;margin:0 auto;padding:24px 32px}
+.trip-section,.compare-section{display:none}
+.trip-section.active,.compare-section.active{display:block}
+.trip-header{border-radius:14px;padding:24px;margin-bottom:24px;border:2px solid}
+.clearfix::after{content:'';display:block;clear:both}
+.price-block{float:right;text-align:right}
+.price{font-size:26px;font-weight:800}
+.price-label{font-size:11px;color:#718096}
+.flag{font-size:48px;float:left;margin-right:16px;line-height:1}
+.trip-name{font-size:20px;font-weight:700;margin-bottom:8px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.badge{padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid}
+.transport{font-size:12px;color:#718096;margin-bottom:8px}
+.vibe-quote{clear:both;margin-top:14px;padding-top:14px;border-top:1px solid rgba(0,0,0,0.1);font-size:13px;color:#4a5568;font-style:italic}
+.grid{display:grid;grid-template-columns:240px 1fr;gap:20px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+.card{background:white;border-radius:10px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,0.06);border:1px solid #e2e8f0;height:fit-content}
+.card h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#718096;margin-bottom:12px}
+.score-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f7fafc}
+.score-row:last-child{border-bottom:none}
+.score-label{font-size:12px;color:#4a5568}
+.dots{display:flex;gap:3px}
+.dot{width:9px;height:9px;border-radius:50%}
+.dot.on{background:#f6ad55}
+.dot.off{background:#e2e8f0}
+.na{font-size:10px;color:#cbd5e0;font-style:italic}
+.dests h3{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#718096;margin-bottom:12px}
+.dest{background:white;border-radius:10px;margin-bottom:10px;border:1px solid #e2e8f0;overflow:hidden}
+.dest-head{padding:14px 16px;cursor:pointer;display:flex;align-items:flex-start;gap:12px}
+.dest-head:hover{background:#f7fafc}
+.nights{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;margin-top:2px}
+.d-name{font-size:14px;font-weight:600;color:#1a202c}
+.d-hotel{font-size:11px;color:#a0aec0;margin-top:1px}
+.d-vibe{font-size:12px;color:#718096;font-style:italic;margin-top:4px}
+.toggle{font-size:10px;color:#cbd5e0;flex-shrink:0;margin-top:4px;margin-left:auto}
+.dest-body{display:none;padding:0 16px 14px 60px;font-size:13px;color:#4a5568;line-height:1.65;border-top:1px solid #f0f4f8;padding-top:10px}
+.dest-body.open{display:block}
+.compare-wrapper{overflow-x:auto}
+table.cmp{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+table.cmp thead tr{background:#1a1a2e;color:white}
+table.cmp th{padding:12px 10px;font-size:12px;font-weight:500;text-align:center}
+table.cmp th:first-child{text-align:left;min-width:100px}
+table.cmp th .ff{font-size:20px;display:block;margin-bottom:3px}
+table.cmp th .fn{font-size:10px;opacity:.8;line-height:1.3}
+table.cmp td{padding:9px 10px;font-size:12px;text-align:center;border-bottom:1px solid #f0f4f8}
+table.cmp td:first-child{text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#718096;background:#f9fafb}
+table.cmp tr:last-child td{border-bottom:none}
+.pc{font-weight:700;font-size:13px}
+.dc{display:flex;justify-content:center;gap:3px}
+.vc{font-size:10px;color:#718096;font-style:italic;text-align:left;line-height:1.4;max-width:120px}
+.footer{text-align:center;padding:24px 32px;color:#a0aec0;font-size:12px;border-top:1px solid #e2e8f0;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🌍 Reisoverzicht — 7 Bestemmingen</h1>
+  <p>Dag-per-dag programma, verwachtingen &amp; sfeer</p>
+  <div class="header-meta"><span>Via Connections.be</span><span>bvr@connections.be</span><span>03/361.44.50</span></div>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="show('th',this)">🇹🇭 Thailand</div>
+  <div class="tab" onclick="show('ca',this)">🍁 Canada</div>
+  <div class="tab" onclick="show('ba',this)">🌴 Bali</div>
+  <div class="tab" onclick="show('vn',this)">🇻🇳 Vietnam</div>
+  <div class="tab" onclick="show('jp',this)">🇯🇵 Japan</div>
+  <div class="tab" onclick="show('cr',this)">🇨🇷 Costa Rica</div>
+  <div class="tab" onclick="show('sl',this)">🇱🇰 Sri Lanka</div>
+  <div class="tab" onclick="show('cmp',this)">📊 Vergelijking</div>
+</div>
+<div class="main">
+
+<div id="s-th" class="trip-section active">
+  <div class="trip-header clearfix" style="background:#EBF4FF;border-color:#BEE3F8">
+    <div class="price-block"><div class="price" style="color:#2B6CB0">€3.368</div><div class="price-label">per persoon</div></div>
+    <div class="flag">🇹🇭</div>
+    <div>
+      <div class="trip-name">Thailand à la carte</div>
+      <div class="badges">
+        <span class="badge" style="background:#EBF4FF;border-color:#BEE3F8;color:#2B6CB0">18 dagen · Nov 2025 · 5 pers. · Ref 425179</span>
+      </div>
+      <div class="transport">Qatar Airways + 2e klas nachtrein + binnenlandse vlucht + privétransfers</div>
+    </div>
+    <div class="vibe-quote">"Perfecte mix van stadscultuur, jungle-avontuur en strandrust. Van chaos naar stilte. November = perfect droog seizoen. 🌴"</div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Profiel</h3>
+      <div class="score-row"><span class="score-label">Natuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+      <div class="score-row"><span class="score-label">Cultuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Strand</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Avontuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Gezin</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Wildlife</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Comfort</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+    </div>
+    <div class="dests">
+      <h3>Dag-per-dag &amp; Vibe — klik om details te zien</h3>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#3182CE">2n</div><div style="flex:1"><div class="d-name">Bangkok</div><div class="d-hotel">Lit Bangkok Hotel</div><div class="d-vibe">"Bruisende megastad — tempels, klongs en streetfood"</div></div><div class="toggle">▼</div></div><div class="dest-body">Royal Palace, Wat Po, Wat Arun per longtail boot, Chinatown. Meest sensorisch intense dag van de trip. Vroeg vertrekken — hitte bouwt snel op. Bescheiden kleding vereist bij tempels.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#3182CE">2n</div><div style="flex:1"><div class="d-name">Kanchanaburi</div><div class="d-hotel">Mida Resort Kanchanaburi</div><div class="d-vibe">"Historisch + natuur — River Kwai en smaragdgroene watervallen"</div></div><div class="toggle">▼</div></div><div class="dest-body">Trainmarket (trein passeert op cm van de kramen), drijvende markt, River Kwai Bridge. Erawan National Park: 7 gelaagde watervallen — zwemmen in turquoise poelen. Death Railway over viaducten + nachtrein Chiang Mai.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#3182CE">3n</div><div style="flex:1"><div class="d-name">Chiang Mai</div><div class="d-hotel">Kantary Hills Chiang Mai</div><div class="d-vibe">"Cultureel + koel — tempels, Doi Inthanon, Khao Soi"</div></div><div class="toggle">▼</div></div><div class="dest-body">Bicycle tour Lanna platteland. Doi Inthanon NP (2.565m): koninklijke pagoden, mosserig oerwoud, bergstammen Witte Karen, koffie proeven. Vrije dag: Oude Stad, avondmarkt, Khao Soi noodelsoep.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#3182CE">2n</div><div style="flex:1"><div class="d-name">Elephant Hills / Khao Sok NP</div><div class="d-hotel">Elephant Hills Elephant Camp</div><div class="d-vibe">"Jungle avontuur — olifanten, kajak en oerwoud"</div></div><div class="toggle">▼</div></div><div class="dest-body">Ethisch olifantenkamp (voeden, wassen). Kano safari door kalksteenkloven. Cheow Lan meer: kalksteenpieken rijzen recht uit het water ("Thailand's Guilin"). Jungle trekking door een van de oudste regenwouden van Azië.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#3182CE">5n</div><div style="flex:1"><div class="d-name">Khao Lak</div><div class="d-hotel">Kalima Resort &amp; Villas</div><div class="d-vibe">"Rustig strandparadijs — Similan Islands en zee"</div></div><div class="toggle">▼</div></div><div class="dest-body">Resort direct aan het strand. Optionele dagtrips: Similan Islands (helderste water van Thailand), James Bond Island in Phang Nga Bay. Khao Lak is bewust rustiger dan Phuket.</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="s-ca" class="trip-section">
+  <div class="trip-header clearfix" style="background:#FFF5F5;border-color:#FED7D7">
+    <div class="price-block"><div class="price" style="color:#C53030">€2.473</div><div class="price-label">per persoon</div></div>
+    <div class="flag">🍁</div>
+    <div>
+      <div class="trip-name">Kids Go Canada</div>
+      <div class="badges"><span class="badge" style="background:#FFF5F5;border-color:#FED7D7;color:#C53030">19 dagen · Jul 2026 · 4 pers. · Ref 464245</span></div>
+      <div class="transport">Air Canada (direct Brussel) + huurwagen Hyundai Venue SUV (inbegrepen)</div>
+    </div>
+    <div class="vibe-quote">"Perfecte familie-roadtrip van stad naar natuur naar spektakel. Nooit gehaast (2n/plek). Eigen SUV = totale vrijheid. Niagara Falls als kers op de taart. 🚗🍁"</div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Profiel</h3>
+      <div class="score-row"><span class="score-label">Natuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Cultuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Strand</span><span class="na">n.v.t.</span></div>
+      <div class="score-row"><span class="score-label">Avontuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Gezin</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+      <div class="score-row"><span class="score-label">Wildlife</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Comfort</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+    </div>
+    <div class="dests">
+      <h3>Dag-per-dag &amp; Vibe — klik om details te zien</h3>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#E53E3E">2n</div><div style="flex:1"><div class="d-name">Montreal</div><div class="d-hotel">Homewood Suites by Hilton Midtown</div><div class="d-vibe">"Franstalige grootstad — Europese charme in Noord-Amerika"</div></div><div class="toggle">▼</div></div><div class="dest-body">Vieux-Montréal (keien, Franse gevels), Marché Jean-Talon (een van grootste openluchtmarkten NA), Parc du Mont-Royal. Alles in het Frans — direct voelbaar.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#E53E3E">2n</div><div style="flex:1"><div class="d-name">Quebec City</div><div class="d-hotel">Quality Inn Quebec</div><div class="d-vibe">"Sprookjesachtig middeleeuws — mooiste stad van Canada"</div></div><div class="toggle">▼</div></div><div class="dest-body">Enige volledig bewaarde ommuurde stad in Noord-Amerika (UNESCO). Château Frontenac, Citadelle, Plaines of Abraham. Feels als een stukje Frankrijk in Canada.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#E53E3E">2n</div><div style="flex:1"><div class="d-name">Tadoussac</div><div class="d-hotel">Hôtel Tadoussac</div><div class="d-vibe">"Walvissen in het wild — kleinschalig en onvergetelijk"</div></div><div class="toggle">▼</div></div><div class="dest-body">Juli = topseizoen walvissen spotten (beluga's, vinvissen, blauwe vinvissen) aan samenvloeiing Saguenay-St.Lawrence. Boottochten vanuit haven. Zandduinen, Kids' Club. Dorp van 800 inwoners.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#E53E3E">2n</div><div style="flex:1"><div class="d-name">Roberval</div><div class="d-hotel">Travelodge by Wyndham Roberval</div><div class="d-vibe">"Lokaal en rustig aan het immense Lac-Saint-Jean"</div></div><div class="toggle">▼</div></div><div class="dest-body">Gemeentelijk strand aan het meer, fietsen langs Route Verte, waterval Chute Ouiatchouan bij Val-Jalbert. Weinig toerisme — het echte dagelijkse Quebec.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#E53E3E">2n</div><div style="flex:1"><div class="d-name">Sacacomie</div><div class="d-hotel">Hotel Sacacomie</div><div class="d-vibe">"Wilderness luxe — bos, meer, spa en absolute stilte"</div></div><div class="toggle">▼</div></div><div class="dest-body">Bosresort aan spiegelend meer in ongerepte natuur. Kanoën, privéstrand, spa, terras met meerzicht. 's Avonds vuurvliegjes en absolute stilte. Meest rustgevende stop van de trip.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#E53E3E">2n</div><div style="flex:1"><div class="d-name">Kingston</div><div class="d-hotel">Home2 Suites by Hilton Kingston</div><div class="d-vibe">"Maritiem en historisch — fort en universitaire charme"</div></div><div class="toggle">▼</div></div><div class="dest-body">Fort Henry (UNESCO), Kingston Penitentiary (indrukwekkende rondleidingen), waterkant met boottochtjes naar Thousand Islands. Charmante universiteitsstad aan Lake Ontario.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#E53E3E">2n</div><div style="flex:1"><div class="d-name">Huntsville / Muskoka</div><div class="d-hotel">Home2 Suites by Hilton Huntsville</div><div class="d-vibe">"Cottage country — meren, bossen en het echte Canada"</div></div><div class="toggle">▼</div></div><div class="dest-body">Arrowhead Provincial Park: wandelen, zwemmen in kristalhelder meer, kanoën, wildlife spotten. Muskoka Heritage Place (pionierleven 19e eeuw). Het Canada van de postkaartjes.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#E53E3E">3n</div><div style="flex:1"><div class="d-name">Toronto + Niagara Falls ✅ inbegrepen</div><div class="d-hotel">Chelsea Hotel Toronto</div><div class="d-vibe">"Kosmopolitische finale + meest iconisch natuurschouwspel"</div></div><div class="toggle">▼</div></div><div class="dest-body">CN Tower, Ripley's Aquarium, Royal Ontario Museum, Distillery District. INBEGREPEN: 10u Niagara Falls dagexcursie — drie watervallen, mist, kracht die je niet vergeet. Een van de meest indrukwekkende natuurfenomenen ter wereld.</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="s-ba" class="trip-section">
+  <div class="trip-header clearfix" style="background:#F0FFF4;border-color:#C6F6D5">
+    <div class="price-block"><div class="price" style="color:#276749">€2.749</div><div class="price-label">per persoon</div></div>
+    <div class="flag">🌴</div>
+    <div>
+      <div class="trip-name">Bali à la carte</div>
+      <div class="badges"><span class="badge" style="background:#F0FFF4;border-color:#C6F6D5;color:#276749">15 dagen · Sep 2026 · Ref 464501</span></div>
+      <div class="transport">Qatar Airways + alle privétransfers + fast boats (inbegrepen)</div>
+    </div>
+    <div class="vibe-quote">"Cultuur → avontuur → rust. Telkens 3 nachten geeft tijd om echt te landen. September = begin droog seizoen. 🌺"</div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Profiel</h3>
+      <div class="score-row"><span class="score-label">Natuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Cultuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Strand</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Avontuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Gezin</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Wildlife</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Comfort</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+    </div>
+    <div class="dests">
+      <h3>Dag-per-dag &amp; Vibe — klik om details te zien</h3>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#38A169">3n</div><div style="flex:1"><div class="d-name">Ubud</div><div class="d-hotel">Mathis Retreat</div><div class="d-vibe">"Spiritueel hart van Bali — tempels, rijstvelden, e-bike"</div></div><div class="toggle">▼</div></div><div class="dest-body">E-bike Jatiluwih (UNESCO rijstterrassen, ±4u). Tempeltour: Ulundanu (drijvende tempel in bergmeer, mist), Alas Kedaton (heilig apenwoud), Tanah Lot (rotstempel bij zonsondergang). Drie totaal verschillende ervaringen op één dag.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#38A169">3n</div><div style="flex:1"><div class="d-name">Amed</div><div class="d-hotel">Mathis Lodge</div><div class="d-vibe">"Rustig vissersdorp — beste snorkel van Bali"</div></div><div class="toggle">▼</div></div><div class="dest-body">Zwarte zandstranden, lokale warungs. Snorkelprogramma bij USAT Liberty WWII scheepswrak (3-5m diepte, volledig overgroeid met koraal). Onderweg: Besakih moedertempel op Agung-flanken + Tirta Gangga koninklijk waterpaleis.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#38A169">3n</div><div style="flex:1"><div class="d-name">Nusa Penida</div><div class="d-hotel">The Sebali Penida Beach Resort</div><div class="d-vibe">"Ruige kliffen, manta's — het meest wild"</div></div><div class="toggle">▼</div></div><div class="dest-body">Kelingking Beach (T-rex klif, spectaculair uitzicht), Angel's Billabong, Crystal Bay. Snorkelen met reuzenmanta's (3-4m spanwijdte) bij Manta Point — een bucket list ervaring.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#38A169">3n</div><div style="flex:1"><div class="d-name">Sanur</div><div class="d-hotel">Sagara Villas &amp; Suites</div><div class="d-vibe">"Elegant, rustig strandleven — perfecte afsluiter"</div></div><div class="toggle">▼</div></div><div class="dest-body">5km beachfront promenade, Balinese massages, optioneel dagtripje Nusa Lembongan. Late check-out 18u — volledige laatste dag. Sanur = meest rustige en volwassen strandwijk van Bali.</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="s-vn" class="trip-section">
+  <div class="trip-header clearfix" style="background:#FFFFF0;border-color:#FEFCBF">
+    <div class="price-block"><div class="price" style="color:#975A16">€3.665</div><div class="price-label">per persoon</div></div>
+    <div class="flag">🇻🇳</div>
+    <div>
+      <div class="trip-name">Vietnam Optie 2</div>
+      <div class="badges"><span class="badge" style="background:#FFFFF0;border-color:#FEFCBF;color:#975A16">15 dagen · Apr 2026 · 4 pers. · Ref 453592 · ✓ Privégids</span></div>
+      <div class="transport">Singapore Airlines (Amsterdam, 1 stop) + binnenlandse vlucht Hanoi→Hue + privégids volledige reis</div>
+    </div>
+    <div class="vibe-quote">"Diepgaande culturele doortocht met privégids. Voor wie Vietnam écht wil begrijpen. Geen stranddagen — puur het beste van Noord- en Centraal-Vietnam. 🌿"</div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Profiel</h3>
+      <div class="score-row"><span class="score-label">Natuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Cultuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+      <div class="score-row"><span class="score-label">Strand</span><span class="na">n.v.t.</span></div>
+      <div class="score-row"><span class="score-label">Avontuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Gezin</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Wildlife</span><div class="dots"><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Comfort</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+    </div>
+    <div class="dests">
+      <h3>Dag-per-dag &amp; Vibe — klik om details te zien</h3>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D69E2E">2n</div><div style="flex:1"><div class="d-name">Hanoi</div><div class="d-hotel">May De Ville Lakeside Hotel &amp; Spa</div><div class="d-vibe">"Chaotisch, historisch, authentiek — Vietnam op zijn meest intens"</div></div><div class="toggle">▼</div></div><div class="dest-body">Privétour als local (07:00-18:00): Hoan Kiem meer bij dageraad, eierkoffie, 36-straatjes, Hoa Lo gevangenis, Tempel v/d Literatuur, bun cha lunch (Obama+Bourdain), Treinstraat, bia hoi. Gids is hier essentieel.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D69E2E">2n</div><div style="flex:1"><div class="d-name">Mai Chau</div><div class="d-hotel">Mai Châu Hideaway Lake Resort</div><div class="d-vibe">"Stille vallei, Witte Thai cultuur, lakeside luxe"</div></div><div class="toggle">▼</div></div><div class="dest-body">Wandeltocht Săm Pà–Cha Long (10km, gemakkelijk, 2-3u) door bergdorpjes, bamboetunnel en akkers. Boottocht op het meer. Afgesloten dal bewoond door de Witte Thai minderheid — mini-Sapa zonder de drukte.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D69E2E">2n</div><div style="flex:1"><div class="d-name">Ninh Binh</div><div class="d-hotel">Emeralda Resort Tam Coc</div><div class="d-vibe">"Halong Bay op het land — boottochten en kalksteengrotten"</div></div><div class="toggle">▼</div></div><div class="dest-body">Tam Coc boottocht door 3 grotten in rijstveldlandschap (roeiers met hun voeten). Fietstocht door bergdorpjes. Hoa Lu: 10e-eeuwse hoofdstad van Vietnam met tempels van dynastieën Dinh en Le.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D69E2E">2n</div><div style="flex:1"><div class="d-name">Halong Bay — Orchid Classic Cruise</div><div class="d-hotel">Family Suite met balkon, 2 nachten</div><div class="d-vibe">"Wereldwonder op het water — grotten, kajak, fusiondiner"</div></div><div class="toggle">▼</div></div><div class="dest-body">Dag 1: kajak door Dark &amp; Bright Caves, ankeren in Lan Ha Bay, kookdemo, fusiondiner. Dag 2: tai chi bij zonsopgang, geïsoleerd dorp Viet Hai, fietstocht regenwoud, kajakken. Een van de zeven nieuwe wereldwonderen.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D69E2E">2n</div><div style="flex:1"><div class="d-name">Hue</div><div class="d-hotel">Pilgrimage Village Boutique Resort &amp; Spa</div><div class="d-vibe">"Keizerlijke melancholie — fiets, Parfumrivier, Verboden Stad"</div></div><div class="toggle">▼</div></div><div class="dest-body">Fietstocht dorp Thuy Bieu, oud amfitheater tigervs-olifantduels, boottocht op Parfumrivier, Thien Mu pagode, Paarse Verboden Stad (model Verboden Stad Beijing). 1000 jaar keizerlijk Vietnam.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D69E2E">2n</div><div style="flex:1"><div class="d-name">Hoi An</div><div class="d-hotel">Allegro Hoi An</div><div class="d-vibe">"Mooiste oude stad van Vietnam — lantaarns, steegjes, cao lau"</div></div><div class="toggle">▼</div></div><div class="dest-body">Transfer via Hai Van-pas (dramatischste weg van Azië, verplichte stop). Verborgen steegjes tour: Japanse Brug (16e eeuw), lantaarns maken, cao lau (noedels enkel mogelijk in Hoi An). Rode lantaarns, gele gevels, kanalen.</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="s-jp" class="trip-section">
+  <div class="trip-header clearfix" style="background:#FFF0F3;border-color:#FED7E2">
+    <div class="price-block"><div class="price" style="color:#97266D">€4.425</div><div class="price-label">per persoon</div></div>
+    <div class="flag">🇯🇵</div>
+    <div>
+      <div class="trip-name">Rondreis Japan</div>
+      <div class="badges"><span class="badge" style="background:#FFF0F3;border-color:#FED7E2;color:#97266D">17 dagen · Jul 2026 · Ref 469364 · Alle treinen inbegrepen</span></div>
+      <div class="transport">Emirates (Brussel, 1 stop) + alle shinkansen, treinen &amp; bussen inbegrepen</div>
+    </div>
+    <div class="vibe-quote">"Meesterlijk opgebouwde rondreis. Van futuristische metropool naar tijdloze bergdorpen naar culinair feest. Ideaal eerste Japan-bezoek. 🗼🍱"</div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Profiel</h3>
+      <div class="score-row"><span class="score-label">Natuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Cultuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+      <div class="score-row"><span class="score-label">Strand</span><span class="na">n.v.t.</span></div>
+      <div class="score-row"><span class="score-label">Avontuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Gezin</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Wildlife</span><span class="na">n.v.t.</span></div>
+      <div class="score-row"><span class="score-label">Comfort</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+    </div>
+    <div class="dests">
+      <h3>Dag-per-dag &amp; Vibe — klik om details te zien</h3>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D53F8C">3n</div><div style="flex:1"><div class="d-name">Tokyo</div><div class="d-hotel">Shiba Park Hotel</div><div class="d-vibe">"Overweldigend, futuristisch en perfect georganiseerd"</div></div><div class="toggle">▼</div></div><div class="dest-body">Asakusa (Senso-ji), Shibuya (beroemde crossing), Harajuku, Akihabara. Dagtrip naar Nikko (UNESCO, watervallen) of Kamakura (15m Boeddha). teamLab Planets immersief kunstmuseum — reserveer vooraf.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D53F8C">2n</div><div style="flex:1"><div class="d-name">Kiso-Fukushima</div><div class="d-hotel">Onyado Tsutaya — ryokan (halfpension)</div><div class="d-vibe">"Feudaal Japan in een bergvallei — ryokan, tatami en stilte"</div></div><div class="toggle">▼</div></div><div class="dest-body">Nakasendo pelgrimsroute. Post-steden Narai-juku en Tsumago-juku (UNESCO): volledig intact 17e-eeuwse straatjes. Wandelpad Tsumago-Magome (8km, 2,5u). Tatami, futon, yukata kimono, kaiseki-diner.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D53F8C">2n</div><div style="flex:1"><div class="d-name">Takayama + Shirakawago</div><div class="d-hotel">Hotel Around Takayama Suite</div><div class="d-vibe">"Klein-Kyoto van de bergen — sake, ambachten en Shirakawago"</div></div><div class="toggle">▼</div></div><div class="dest-body">Sanmachi Suji sake-brouwerijstraat. Bus naar Shirakawago (inbegrepen): UNESCO-dorp met gassho-zukuri boerderijen (steile strodaken — gebouwd voor Alpensneeuw). Bijna te mooi om echt te zijn.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D53F8C">1n</div><div style="flex:1"><div class="d-name">Kanazawa</div><div class="d-hotel">Kanazawa Sainoniwa Hotel</div><div class="d-vibe">"Het onontdekte Kyoto — geisha, samoeraaien, perfecte tuinen"</div></div><div class="toggle">▼</div></div><div class="dest-body">Kenroku-en (top-3 mooiste tuin van Japan), Higashi Chaya geishastraat, Nagamachi samuraaiwijk. Eén nacht — compact maar bijzonder rijk.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D53F8C">3n</div><div style="flex:1"><div class="d-name">Kyoto</div><div class="d-hotel">Mercure Kyoto Station</div><div class="d-vibe">"1.600 tempels en torii-poorten — het spirituele hart van Japan"</div></div><div class="toggle">▼</div></div><div class="dest-body">Fushimi Inari (oranje torii-poorten op berg, vroeg gaan voor mist), Arashiyama bamboewoud, Kinkaku-ji (Gouden Paviljoen), Gion-wijk (kans op geisha). Dagtrip Nara: vrijlopende herten + 15m Boeddha.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D53F8C">1n</div><div style="flex:1"><div class="d-name">Hiroshima + Miyajima</div><div class="d-hotel">Fav Hiroshima Heiwaodori</div><div class="d-vibe">"Vredesstad met diepe indruk + drijvende torii op Miyajima"</div></div><div class="toggle">▼</div></div><div class="dest-body">Peace Memorial Park + Museum (A-Bomb Dome, confronterend en onmisbaar). Veerboot naar Miyajima: de drijvende Itsukushima torii in het water. Twee totaal verschillende maar even indrukwekkende ervaringen op één dag.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#D53F8C">2n</div><div style="flex:1"><div class="d-name">Osaka</div><div class="d-hotel">Hotel Elcient Osaka</div><div class="d-vibe">"Lekkerste stad van Japan — eten, neon en feestelijk straatleven"</div></div><div class="toggle">▼</div></div><div class="dest-body">Dotonbori (neon, takoyaki, okonomiyaki), Kuromon Ichiba versmarkt, Osaka Castle. Dagtrip: Nara (30min), Kobe (Kobe beef proeven) of Universal Studios Japan (Nintendoland, Harry Potter).</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="s-cr" class="trip-section">
+  <div class="trip-header clearfix" style="background:#F0FFF4;border-color:#9AE6B4">
+    <div class="price-block"><div class="price" style="color:#22543D">€3.630</div><div class="price-label">per persoon</div></div>
+    <div class="flag">🇨🇷</div>
+    <div>
+      <div class="trip-name">Rondreis Costa Rica</div>
+      <div class="badges"><span class="badge" style="background:#F0FFF4;border-color:#9AE6B4;color:#22543D">17 dagen · Jul-aug 2026 · 4 pers. · Ref 468163 · ✓ Begeleiding bij start</span></div>
+      <div class="transport">United Airlines (Brussel, stop Newark) + 12 dagen 4WD SUV huurwagen (inbegrepen, full cover)</div>
+    </div>
+    <div class="vibe-quote">"Complete Costa Rica-ervaring. Caribische jungle → vulkaan → wolkenwoud → Pacifische kust. 4WD vrijheid + begeleiding waar nodig. 🦥🌋🏖️"</div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Profiel</h3>
+      <div class="score-row"><span class="score-label">Natuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+      <div class="score-row"><span class="score-label">Cultuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Strand</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Avontuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+      <div class="score-row"><span class="score-label">Gezin</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+      <div class="score-row"><span class="score-label">Wildlife</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+      <div class="score-row"><span class="score-label">Comfort</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+    </div>
+    <div class="dests">
+      <h3>Dag-per-dag &amp; Vibe — klik om details te zien</h3>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#276749">2n</div><div style="flex:1"><div class="d-name">Tortuguero National Park</div><div class="d-hotel">Evergreen Lodge — volpension</div><div class="d-vibe">"Jungle-lodge per boot — schildpadden, apen en krokodillen"</div></div><div class="toggle">▼</div></div><div class="dest-body">Enkel bereikbaar per boot — geen wegen. Kanaaltochten in stille boten: 4 apensoorten, kaaimannen, manatees, toekaansen op armlengte. Juli-aug = broedseizoen zeeschildpadden (nachtelijke tour optioneel).</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#276749">3n</div><div style="flex:1"><div class="d-name">Puerto Viejo de Talamanca</div><div class="d-hotel">Azania Bungalows</div><div class="d-vibe">"Reggae-sfeer, koraalrif, luiaards en chocoladepalmen"</div></div><div class="toggle">▼</div></div><div class="dest-body">4WD huurwagen afhalen. Cahuita NP (enige koraalrif van CR, snorkelen), Punta Uva strand. Bribri indianenreservaat: cacao-tour bij inheemse gemeenschap. Afro-Caribische cultuur en laid-back sfeer.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#276749">3n</div><div style="flex:1"><div class="d-name">La Fortuna / Arenal</div><div class="d-hotel">Hotel Arenal Montechiari</div><div class="d-vibe">"Actieve vulkaan, hangbruggen en warmwaterbronnen"</div></div><div class="toggle">▼</div></div><div class="dest-body">Arenal Hanging Bridges (tot 100m hoog in regenwoud), La Fortuna waterval (70m, 500 treden), white water rafting, canyoning. Warmwaterbronnen 's avonds verlicht met vulkaansilhouet als decor — bijna magisch.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#276749">2n</div><div style="flex:1"><div class="d-name">Santa Elena / Monteverde</div><div class="d-hotel">Cala Lodge</div><div class="d-vibe">"Mysterieus mistig woud — quetzals, ziplines en biodiversiteit"</div></div><div class="toggle">▼</div></div><div class="dest-body">Monteverde Cloud Forest (6 ecosystemen, gids essentieel). Zipline-hoofdstad van CR: Sky Trek tot 1,5km lang boven het wolkenwoud. Vlindertuin (40 soorten), kikkervijver, herpetarium.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#276749">3n</div><div style="flex:1"><div class="d-name">Nicoya Peninsula</div><div class="d-hotel">Tango Mar Beachfront Boutique — gerund door Belgen</div><div class="d-vibe">"Rustige Pacifische kust — Belgisch boutique-hotel aan zee"</div></div><div class="toggle">▼</div></div><div class="dest-body">Stille Oceaan, infinitipool, privébaai. Augustus = walvissen en dolfijnen voor de kust. Snorkelen Isla Gitana, mangrove-kajakvaart. Het Belgische beheer geeft een extra vertrouwd gevoel.</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="s-sl" class="trip-section">
+  <div class="trip-header clearfix" style="background:#FFFAF0;border-color:#FEEBC8">
+    <div class="price-block"><div class="price" style="color:#C05621">v.a. €2.179</div><div class="price-label">per persoon*</div></div>
+    <div class="flag">🇱🇰</div>
+    <div>
+      <div class="trip-name">Best of Sri Lanka</div>
+      <div class="badges"><span class="badge" style="background:#FFFAF0;border-color:#FEEBC8;color:#C05621">15 dagen · Flexibel · ✓ Privéchauffeur-gids · *Excl. vluchten</span></div>
+      <div class="transport">Vluchten niet inbegrepen + privéchauffeur-gids (Engelstalig) gedurende de volledige reis</div>
+    </div>
+    <div class="vibe-quote">"Perfectly balanced — historische grandeur, eco-lodge, spirituele diepgang, safari en luxueus strand. Volledig op eigen ritme. 🌿🦁🍵"</div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Profiel</h3>
+      <div class="score-row"><span class="score-label">Natuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Cultuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+      <div class="score-row"><span class="score-label">Strand</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+      <div class="score-row"><span class="score-label">Avontuur</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Gezin</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Wildlife</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></div>
+      <div class="score-row"><span class="score-label">Comfort</span><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+    </div>
+    <div class="dests">
+      <h3>Dag-per-dag &amp; Vibe — klik om details te zien</h3>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#ED8936">1n</div><div style="flex:1"><div class="d-name">Negombo</div><div class="d-hotel">Goldi Sands 3★</div><div class="d-vibe">"Zachte landing aan zee — transitnacht"</div></div><div class="toggle">▼</div></div><div class="dest-body">Rustige visserstad op 10 min van de luchthaven. Strand en zwembad. Geen bezienswaardigheden gepland — bewust herstel na de vlucht voor een rijke trip.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#ED8936">3n</div><div style="flex:1"><div class="d-name">Sigiriya — Culturele Driehoek</div><div class="d-hotel">Fresco Water Villa 4★</div><div class="d-vibe">"Leeuwenrots, rotstempels en jungle — historisch op zijn hoogtepunt"</div></div><div class="toggle">▼</div></div><div class="dest-body">Sigiriya (UNESCO, 193m): 5e-eeuws koninklijk paleis op granietkolos, fresco's van hemelse maagden, reusachtige leeuwenklauwpoten. Vroeg gaan. Pollonaruwa per fiets: Gal Vihara reusachtige Boeddha's gehouwen in de rots.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#ED8936">2n</div><div style="flex:1"><div class="d-name">Knuckles Mountains</div><div class="d-hotel">Madulkelle Tea &amp; Eco Lodge 4★</div><div class="d-vibe">"Luxe tentenkamp in UNESCO bergwoud met theeplantages"</div></div><div class="toggle">▼</div></div><div class="dest-body">Luxueuze eco-lodges op 1.200m in het Knuckles Forest. Wandelingen door theeplantages, vogelspotten, yoga bij zonsopgang, kampvuur. Meest bijzondere accommodatie van de trip.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#ED8936">2n</div><div style="flex:1"><div class="d-name">Kandy</div><div class="d-hotel">Suisse Hotel 4★</div><div class="d-vibe">"Heiligste tempel van Sri Lanka aan een schilderachtig meer"</div></div><div class="toggle">▼</div></div><div class="dest-body">Temple of the Tooth (heiligste boeddhistische tempel). Avondceremonie puja: trommen, fluiten, rookoffers — intens en indrukwekkend. Botanische tuin Peradeniya. Kandyaanse dansprestatie.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#ED8936">2n</div><div style="flex:1"><div class="d-name">Nuwara Eliya</div><div class="d-hotel">Mirage Kings Cottage 4★</div><div class="d-vibe">"Mooiste treinrit van Azië + koloniaal bergidylle"</div></div><div class="toggle">▼</div></div><div class="dest-body">Beroemde blauwe trein Kandy→Nuwara Eliya (3u): officieel mooiste treinrit van Azië door theeplantages en viaducten. Theefabriekbezoek. "Little England" op 1.868m: koloniale bungalows, rozentuin, koele berglucht.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#ED8936">1n</div><div style="flex:1"><div class="d-name">Udawalawa National Park</div><div class="d-hotel">Hotel ter plaatse</div><div class="d-vibe">"Beste olifantensafari van Sri Lanka"</div></div><div class="toggle">▼</div></div><div class="dest-body">Jeepsafari: kuddes van 20-50 wilde olifanten dagelijks zichtbaar. Krokodillen, watervarkens, 200+ vogelsoorten. Olifantenweeshuis: gestrande kalvjes worden gered en gerevalideerd.</div></div>
+      <div class="dest"><div class="dest-head" onclick="tog(this)"><div class="nights" style="background:#ED8936">4n</div><div style="flex:1"><div class="d-name">Bentota</div><div class="d-hotel">Shinagawa Beach Hotel 5★</div><div class="d-vibe">"5★ strandfinale met Ayurveda en de westkust"</div></div><div class="toggle">▼</div></div><div class="dest-body">4 nachten strandluxe als beloning. Mangrove boottocht op Bentota-rivier, authentieke Ayurveda massages, surfen in Hikkaduwa, dagtrip naar Galle Fort (17e-eeuws VOC-fort, UNESCO).</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="s-cmp" class="compare-section">
+  <div class="compare-wrapper">
+    <table class="cmp">
+      <thead><tr>
+        <th>Criteria</th>
+        <th><span class="ff">🇹🇭</span><span class="fn">Thailand</span></th>
+        <th><span class="ff">🍁</span><span class="fn">Canada</span></th>
+        <th><span class="ff">🌴</span><span class="fn">Bali</span></th>
+        <th><span class="ff">🇻🇳</span><span class="fn">Vietnam</span></th>
+        <th><span class="ff">🇯🇵</span><span class="fn">Japan</span></th>
+        <th><span class="ff">🇨🇷</span><span class="fn">Costa Rica</span></th>
+        <th><span class="ff">🇱🇰</span><span class="fn">Sri Lanka</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Prijs p.p.</td><td class="pc" style="color:#2B6CB0">€3.368</td><td class="pc" style="color:#C53030">€2.473</td><td class="pc" style="color:#276749">€2.749</td><td class="pc" style="color:#975A16">€3.665</td><td class="pc" style="color:#97266D">€4.425</td><td class="pc" style="color:#22543D">€3.630</td><td class="pc" style="color:#C05621">v.a. €2.179*</td></tr>
+        <tr><td>Duur</td><td>18 d.</td><td>19 d.</td><td>15 d.</td><td>15 d.</td><td>17 d.</td><td>17 d.</td><td>15 d.</td></tr>
+        <tr><td>Periode</td><td>Nov '25</td><td>Jul '26</td><td>Sep '26</td><td>Apr '26</td><td>Jul '26</td><td>Jul-aug '26</td><td>Flex.</td></tr>
+        <tr><td>Privégids</td><td>—</td><td>—</td><td>—</td><td>✅</td><td>—</td><td>✅ start</td><td>✅</td></tr>
+        <tr><td>Natuur</td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td></tr>
+        <tr><td>Cultuur</td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></td></tr>
+        <tr><td>Strand</td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><span style="font-size:10px;color:#cbd5e0">n.v.t.</span></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><span style="font-size:10px;color:#cbd5e0">n.v.t.</span></td><td><span style="font-size:10px;color:#cbd5e0">n.v.t.</span></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></td></tr>
+        <tr><td>Avontuur</td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></td></tr>
+        <tr><td>Gezin</td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td></tr>
+        <tr><td>Wildlife</td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><span style="font-size:10px;color:#cbd5e0">n.v.t.</span></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td></tr>
+        <tr><td>Comfort</td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot off"></div></div></td><td><div class="dc"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></td></tr>
+        <tr><td>Vibe</td><td class="vc">Mix van alles — stad, jungle, avontuur &amp; strand</td><td class="vc">Perfecte familie roadtrip + Niagara als finale</td><td class="vc">Cultuur → avontuur → rust. Eilanden &amp; manta's</td><td class="vc">Culturele diepgang met privégids</td><td class="vc">Futurisme + traditie + culinair feest</td><td class="vc">Pure wilde natuur van vulkaan tot oceaan</td><td class="vc">Perfectly balanced — alles in één trip</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:11px;color:#a0aec0;margin-top:10px">*Sri Lanka exclusief vluchten</p>
+</div>
+
+</div>
+<div class="footer">Samengesteld via <strong>Connections.be</strong> &nbsp;·&nbsp; bvr@connections.be &nbsp;·&nbsp; 03/361.44.50</div>
+<script>
+function show(id,el){
+  document.querySelectorAll('.trip-section,.compare-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  el.classList.add('active');
+}
+function tog(h){
+  var b=h.nextElementSibling,t=h.querySelector('.toggle');
+  if(b.classList.contains('open')){b.classList.remove('open');t.textContent='▼';}
+  else{b.classList.add('open');t.textContent='▲';}
+}
+</script>
+</body>
+</html>
